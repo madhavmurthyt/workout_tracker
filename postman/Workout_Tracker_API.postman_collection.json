@@ -1,0 +1,1315 @@
+{
+  "info": {
+    "name": "Workout Tracker API",
+    "description": "Complete API collection for the Workout Tracker application. Includes authentication, workout management, scheduling, logging, and reports.\n\n## Getting Started\n1. Import this collection into Postman\n2. Import the environment file\n3. Run \"1. Signup\" or \"2. Login\" to get an auth token\n4. The token is automatically saved and used for subsequent requests\n\n## Test Order\nRun requests in order within each folder for best results.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "workoutId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "exerciseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scheduleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "logId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has status ok\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql(\"ok\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has timestamp\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.timestamp).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the API server is running"
+          },
+          "response": []
+        }
+      ],
+      "description": "Health check endpoint to verify server status"
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "    pm.collectionVariables.set(\"authToken\", jsonData.token);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.user.id).to.be.a('string');",
+                  "    pm.expect(jsonData.user.username).to.eql(\"testuser\");",
+                  "    pm.collectionVariables.set(\"userId\", jsonData.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\",\n    \"fullname\": \"Test User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signup"]
+            },
+            "description": "Register a new user. Returns a JWT token that is automatically saved for subsequent requests."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.token).to.be.a('string');",
+                  "    pm.collectionVariables.set(\"authToken\", jsonData.token);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has user data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.user.id).to.be.a('string');",
+                  "    pm.collectionVariables.set(\"userId\", jsonData.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"demo@example.com\",\n    \"password\": \"demo123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login with existing credentials. Uses the demo user created by the seed data. Returns a JWT token that is automatically saved."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Login (Invalid Credentials)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has error message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.error).to.eql(\"Invalid credentials\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"demo@example.com\",\n    \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Test login with wrong password - should fail with 401"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms logout\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Logged out successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Logout and invalidate the current token. Note: After running this, you'll need to login again."
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints for user registration, login, and logout"
+    },
+    {
+      "name": "Exercises",
+      "item": [
+        {
+          "name": "List All Exercises",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has exercises array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.exercises).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Save first exercise ID for later use\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.exercises.length > 0) {",
+                  "        pm.collectionVariables.set(\"exerciseId\", jsonData.exercises[0].id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exercises",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exercises"]
+            },
+            "description": "Get all available public exercises. The first exercise ID is saved for use in workout creation."
+          },
+          "response": []
+        },
+        {
+          "name": "List Exercises by Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has exercises array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.exercises).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/exercises?category=Muscle Group",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "exercises"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Muscle Group"
+                }
+              ]
+            },
+            "description": "Filter exercises by category (e.g., Muscle Group, Strengthening, Flexibility)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for browsing available exercises"
+    },
+    {
+      "name": "Workout Plans",
+      "item": [
+        {
+          "name": "1. Create Workout Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has workout data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.workout.id).to.be.a('string');",
+                  "    pm.expect(jsonData.workout.name).to.eql(\"Morning Strength Training\");",
+                  "    pm.collectionVariables.set(\"workoutId\", jsonData.workout.id);",
+                  "});",
+                  "",
+                  "pm.test(\"Workout has exercises\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.workout.planExercises).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Ensure we have an exercise ID",
+                  "if (!pm.collectionVariables.get(\"exerciseId\")) {",
+                  "    console.log(\"Warning: No exerciseId set. Run 'List All Exercises' first.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Morning Strength Training\",\n    \"description\": \"A comprehensive upper body workout\",\n    \"isFavorite\": true,\n    \"exercises\": [\n        {\n            \"exercise_id\": \"{{exerciseId}}\",\n            \"sets\": 4,\n            \"reps\": 10,\n            \"weight_kg\": 60,\n            \"rest_seconds\": 90,\n            \"notes\": \"Focus on form\"\n        }\n    ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workouts"]
+            },
+            "description": "Create a new workout plan with exercises. Run 'List All Exercises' first to get an exercise ID."
+          },
+          "response": []
+        },
+        {
+          "name": "2. List My Workouts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has workouts array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.workouts).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Save first workout ID if available\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.workouts.length > 0) {",
+                  "        pm.collectionVariables.set(\"workoutId\", jsonData.workouts[0].id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workouts"]
+            },
+            "description": "Get all workout plans for the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "3. List Favorite Workouts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"All workouts are favorites\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.workouts.forEach(function(workout) {",
+                  "        pm.expect(workout.isFavorite).to.be.true;",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workouts?status=favorite",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workouts"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "favorite"
+                }
+              ]
+            },
+            "description": "Get only favorite workout plans"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Workout Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has workout object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.workout).to.be.an('object');",
+                  "    pm.expect(jsonData.workout.id).to.eql(pm.collectionVariables.get(\"workoutId\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workouts/{{workoutId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workouts", "{{workoutId}}"]
+            },
+            "description": "Get details of a specific workout plan including all exercises"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Workout Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Workout was updated\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Workout updated successfully\");",
+                  "    pm.expect(jsonData.workout.name).to.eql(\"Updated Morning Routine\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Morning Routine\",\n    \"description\": \"Updated description with new exercises\",\n    \"isFavorite\": true,\n    \"comments\": \"Added more reps for better gains\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/workouts/{{workoutId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workouts", "{{workoutId}}"]
+            },
+            "description": "Update an existing workout plan. Can update name, description, exercises, and add comments."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Delete Workout Plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Workout was deleted\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Workout deleted successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/workouts/{{workoutId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "workouts", "{{workoutId}}"]
+            },
+            "description": "Delete a workout plan. This also removes all associated exercises."
+          },
+          "response": []
+        }
+      ],
+      "description": "CRUD operations for workout plans"
+    },
+    {
+      "name": "Scheduled Workouts",
+      "item": [
+        {
+          "name": "1. Schedule a Workout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has scheduled workout\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.scheduledWorkout.id).to.be.a('string');",
+                  "    pm.expect(jsonData.scheduledWorkout.status).to.eql(\"planned\");",
+                  "    pm.collectionVariables.set(\"scheduleId\", jsonData.scheduledWorkout.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Set scheduled_at to tomorrow",
+                  "var tomorrow = new Date();",
+                  "tomorrow.setDate(tomorrow.getDate() + 1);",
+                  "tomorrow.setHours(9, 0, 0, 0);",
+                  "pm.collectionVariables.set(\"scheduledAt\", tomorrow.toISOString());"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Morning Gym Session\",\n    \"notes\": \"Remember to bring water bottle and towel\",\n    \"scheduled_at\": \"{{scheduledAt}}\",\n    \"duration_minutes\": 60\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule"]
+            },
+            "description": "Schedule a workout for a specific date and time. The scheduled_at is automatically set to tomorrow at 9 AM."
+          },
+          "response": []
+        },
+        {
+          "name": "2. List Scheduled Workouts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has scheduled workouts array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.scheduledWorkouts).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Save first schedule ID if available\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.scheduledWorkouts.length > 0) {",
+                  "        pm.collectionVariables.set(\"scheduleId\", jsonData.scheduledWorkouts[0].id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule"]
+            },
+            "description": "Get all scheduled workouts (defaults to planned and in_progress status)"
+          },
+          "response": []
+        },
+        {
+          "name": "3. List by Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"All workouts have correct status\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    jsonData.scheduledWorkouts.forEach(function(sw) {",
+                  "        pm.expect(sw.status).to.eql(\"planned\");",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule?status=planned",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "planned"
+                }
+              ]
+            },
+            "description": "Filter scheduled workouts by status (planned, in_progress, completed, skipped)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Scheduled Workout Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has scheduled workout\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.scheduledWorkout).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/{{scheduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule", "{{scheduleId}}"]
+            },
+            "description": "Get details of a specific scheduled workout including workout plan and logs"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Start Workout (Update Status)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Status updated to in_progress\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.scheduledWorkout.status).to.eql(\"in_progress\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"in_progress\",\n    \"notes\": \"Started workout at gym\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/{{scheduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule", "{{scheduleId}}"]
+            },
+            "description": "Start a workout by updating its status to 'in_progress'"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Complete Workout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Status updated to completed\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.scheduledWorkout.status).to.eql(\"completed\");",
+                  "    pm.expect(jsonData.scheduledWorkout.completed_at).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"completed\",\n    \"duration_minutes\": 45,\n    \"notes\": \"Great workout! Felt strong today.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/{{scheduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule", "{{scheduleId}}"]
+            },
+            "description": "Mark a workout as completed. Sets completed_at timestamp automatically."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Delete Scheduled Workout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Workout was deleted\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.message).to.eql(\"Scheduled workout deleted successfully\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/schedule/{{scheduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "schedule", "{{scheduleId}}"]
+            },
+            "description": "Cancel/delete a scheduled workout"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for scheduling and managing workout sessions"
+    },
+    {
+      "name": "Workout Logs",
+      "item": [
+        {
+          "name": "1. Log Exercise Set",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has log data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.log.id).to.be.a('string');",
+                  "    pm.expect(jsonData.log.reps_achieved).to.eql(10);",
+                  "    pm.collectionVariables.set(\"logId\", jsonData.log.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduled_workout_id\": \"{{scheduleId}}\",\n    \"exercise_id\": \"{{exerciseId}}\",\n    \"set_number\": 1,\n    \"reps_achieved\": 10,\n    \"weight_kg\": 60,\n    \"rpe\": 7,\n    \"notes\": \"Felt good, could have done more\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logs"]
+            },
+            "description": "Log a completed exercise set. If weight is a personal record, it's automatically tracked.\n\nRPE (Rate of Perceived Exertion) is on a scale of 1-10."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Log Another Set",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has log data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.log.set_number).to.eql(2);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scheduled_workout_id\": \"{{scheduleId}}\",\n    \"exercise_id\": \"{{exerciseId}}\",\n    \"set_number\": 2,\n    \"reps_achieved\": 8,\n    \"weight_kg\": 65,\n    \"rpe\": 8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logs"]
+            },
+            "description": "Log the second set of an exercise with higher weight"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Logs for Workout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has logs array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.logs).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/logs/scheduled/{{scheduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "logs", "scheduled", "{{scheduleId}}"]
+            },
+            "description": "Get all exercise logs for a specific scheduled workout"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for logging exercise sets during workouts"
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Workout Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has summary object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.summary).to.be.an('object');",
+                  "    pm.expect(jsonData.summary).to.have.property('totalCompletedWorkouts');",
+                  "    pm.expect(jsonData.summary).to.have.property('totalDurationMinutes');",
+                  "    pm.expect(jsonData.summary).to.have.property('workoutsThisWeek');",
+                  "    pm.expect(jsonData.summary).to.have.property('workoutsThisMonth');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "summary"]
+            },
+            "description": "Get overall workout statistics including total workouts, duration, and frequency"
+          },
+          "response": []
+        },
+        {
+          "name": "Progress Report (Month)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has progress data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.period).to.eql('month');",
+                  "    pm.expect(jsonData).to.have.property('workoutCount');",
+                  "    pm.expect(jsonData).to.have.property('progressData');",
+                  "    pm.expect(jsonData).to.have.property('personalRecords');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/progress?period=month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "progress"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                }
+              ]
+            },
+            "description": "Get progress report for the last month. Shows workout history and personal records."
+          },
+          "response": []
+        },
+        {
+          "name": "Progress Report (Week)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Period is week\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.period).to.eql('week');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/progress?period=week",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "progress"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "week"
+                }
+              ]
+            },
+            "description": "Get progress report for the last week"
+          },
+          "response": []
+        },
+        {
+          "name": "Progress Report (Year)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Period is year\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.period).to.eql('year');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/progress?period=year",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "progress"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "year"
+                }
+              ]
+            },
+            "description": "Get progress report for the last year"
+          },
+          "response": []
+        },
+        {
+          "name": "Personal Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has personal records array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.personalRecords).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/personal-records",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "personal-records"]
+            },
+            "description": "Get all personal records (max weight/reps) for each exercise"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for generating workout reports and tracking progress"
+    }
+  ]
+}
+
